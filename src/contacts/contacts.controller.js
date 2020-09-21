@@ -1,11 +1,11 @@
-const { contactsModel } = require('./contacts.model');
+const { ContactModel } = require('./contacts.model');
+const mongoose = require('mongoose');
 
 exports.getContacts = async (req, res, next) => {
   try {
-    const contacts = await contactsModel.listContacts();
-    const parsedContacts = JSON.parse(contacts);
+    const contacts = await ContactModel.find();
 
-    res.status(200).json(parsedContacts);
+    res.status(200).json(contacts);
   } catch (error) {
     next({ message: error });
   }
@@ -15,7 +15,7 @@ exports.getContact = async (req, res, next) => {
   const { contactId } = req.params;
 
   try {
-    const contact = await contactsModel.findContactById(contactId);
+    const contact = await ContactModel.findById(contactId);
     if (!contact) {
       res.status(404).json({ message: 'Contact not found' });
       return;
@@ -29,7 +29,13 @@ exports.getContact = async (req, res, next) => {
 
 exports.addContact = async (req, res, next) => {
   try {
-    const newContact = await contactsModel.addContact(req.body);
+    const existingUser = await ContactModel.findOne({ email: req.body.email });
+
+    if (existingUser) {
+      return res.status(409).send('User with such email already exists');
+    }
+
+    const newContact = await ContactModel.create(req.body);
     res.status(201).json(newContact);
   } catch (error) {
     next({ message: error });
@@ -40,13 +46,11 @@ exports.removeContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
 
-    const contact = await contactsModel.findContactById(contactId);
+    const contact = await ContactModel.findByIdAndDelete(contactId);
     if (!contact) {
       res.status(404).json({ message: 'Contact not found' });
       return;
     }
-
-    contactsModel.removeContact(contactId);
 
     res.status(200).json({ message: 'Contact deleted' });
   } catch (error) {
@@ -58,16 +62,18 @@ exports.updateContact = async (req, res, next) => {
   const { contactId } = req.params;
 
   try {
-    const contact = await contactsModel.findContactById(contactId);
-    if (!contact) {
+    const updatedContact = await ContactModel.findByIdAndUpdate(
+      contactId,
+      req.body,
+      {
+        new: true,
+      }
+    );
+
+    if (!updatedContact) {
       res.status(404).json({ message: 'Contact not found' });
       return;
     }
-
-    const updatedContact = await contactsModel.updateContact(
-      contactId,
-      req.body
-    );
 
     res.status(200).json(updatedContact);
   } catch (error) {

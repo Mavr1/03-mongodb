@@ -16,12 +16,18 @@ module.exports.CRUDServer = {
   },
 
   async initDbConnection() {
-    mongoose.set('useCreateIndex', true);
-    await mongoose.connect(process.env.MONGODB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: true,
-    });
+    try {
+      mongoose.set('useCreateIndex', true);
+      await mongoose.connect(process.env.MONGODB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+      });
+      console.log('Database connection successful');
+    } catch (error) {
+      console.log('Error: ' + error.message);
+      process.exit(1);
+    }
   },
 
   initMiddlewares() {
