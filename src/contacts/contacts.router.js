@@ -1,9 +1,11 @@
 const { Router } = require('express');
-const {
-  Types: { ObjectId },
-} = require('mongoose');
-const Joi = require('joi');
+
 const { validate } = require('../helpers/validate');
+const {
+  contactIdSchema,
+  addContactSchema,
+  updateContactSchema,
+} = require('../services/schemes');
 const {
   getContacts,
   getContact,
@@ -13,32 +15,6 @@ const {
 } = require('./contacts.controller');
 
 const router = Router();
-
-const contactIdSchema = Joi.object({
-  contactId: Joi.string()
-    .custom((value, helpers) => {
-      const isValidObjectId = ObjectId.isValid(value);
-      if (!isValidObjectId) {
-        return helpers.error('Invalid user id. Must be object id');
-      }
-
-      return value;
-    })
-    .required(),
-});
-
-const addContactSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().required(),
-  password: Joi.string().required(),
-});
-
-const updateContactSchema = Joi.object({
-  name: Joi.string(),
-  phone: Joi.string(),
-  password: Joi.string(),
-}).min(1);
 
 router.get('/', getContacts);
 
