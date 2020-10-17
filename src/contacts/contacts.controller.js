@@ -1,15 +1,14 @@
 const { ContactModel } = require('./contacts.model');
-const mongoose = require('mongoose');
 const promiseHandler = require('../helpers/helpers');
 
 exports.getContacts = async (req, res, next) => {
   const [error, contacts] = await promiseHandler(ContactModel.find());
 
-  res.status(200).json(contacts);
-
   if (error) {
     next(error);
   }
+
+  res.status(200).json(contacts);
 };
 
 exports.getContact = async (req, res, next) => {
@@ -18,16 +17,17 @@ exports.getContact = async (req, res, next) => {
   const [error, contact] = await promiseHandler(
     ContactModel.findById(contactId)
   );
+
   if (!contact) {
     res.status(404).json({ message: 'Contact not found' });
     return;
   }
 
-  res.status(200).json(contact);
-
   if (error) {
     next(error);
   }
+
+  res.status(200).json(contact);
 };
 
 exports.addContact = async (req, res, next) => {
@@ -42,11 +42,12 @@ exports.addContact = async (req, res, next) => {
   const [errorNewContact, newContact] = await promiseHandler(
     ContactModel.create(req.body)
   );
-  res.status(201).json(newContact);
 
   if (errorUser || errorNewContact) {
     next(errorUser || errorNewContact);
   }
+
+  res.status(201).json(newContact);
 };
 
 exports.removeContact = async (req, res, next) => {
@@ -60,11 +61,11 @@ exports.removeContact = async (req, res, next) => {
     return;
   }
 
-  res.status(200).json({ message: 'Contact deleted' });
-
   if (error) {
     next(error);
   }
+
+  res.status(200).json({ message: 'Contact deleted' });
 };
 
 exports.updateContact = async (req, res, next) => {
@@ -81,9 +82,9 @@ exports.updateContact = async (req, res, next) => {
     return;
   }
 
-  res.status(200).json(updatedContact);
-
   if (error) {
     next(error);
   }
+
+  res.status(200).json(updatedContact);
 };
